@@ -4,6 +4,8 @@ import { globSync } from "node:fs";
 import * as path from "node:path";
 
 const ROUTE_GROUP_REGEX = /^\(.*\)$/; // Wrapped in parentheses
+const DYNAMIC_SEGMENT_REGEX = /^\[(.*)\]$/; // Wrapped in square brackets
+const OPTIONAL_SEGMENT_REGEX = /^\[\[(.*)\]\]$/; // Wrapped in two square brackets
 
 export const fileBasedRoutes = (baseDir: string) => {
   return globSync("**/page.tsx", { cwd: baseDir })
@@ -18,6 +20,8 @@ export const fileBasedRoutes = (baseDir: string) => {
         .split(path.sep)
         .slice(0, -1) // Removes the "page.tsx" part
         .filter((part) => !ROUTE_GROUP_REGEX.test(part)) // Remove any route groups
+        .map((part) => part.replace(OPTIONAL_SEGMENT_REGEX, ":$1?")) // Convert optional segments
+        .map((part) => part.replace(DYNAMIC_SEGMENT_REGEX, ":$1")) // Convert dynamic segments
         .join("/");
 
       const routeName = pascalCase(urlRoute) || "Root";
