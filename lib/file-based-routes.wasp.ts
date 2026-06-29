@@ -11,6 +11,9 @@ export const fileBasedRoutes = (baseDir: string) => {
     .map((filePath) => {
       const absoluteFilePath = path.resolve(baseDir, filePath);
 
+      const isPrerender = filePath.includes("(prerender)");
+      const isAuth = filePath.includes("(auth)");
+
       const urlRoute = filePath
         .split(path.sep)
         .slice(0, -1) // Removes the "page.tsx" part
@@ -27,7 +30,9 @@ export const fileBasedRoutes = (baseDir: string) => {
             importDefault: `${routeName}Page`,
             from: absoluteFilePath,
           }),
+          { authRequired: isAuth },
         ),
+        { prerender: isPrerender },
       );
     });
 };
